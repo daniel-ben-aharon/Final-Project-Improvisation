@@ -17,7 +17,6 @@ CREATE_TABLE = '''CREATE TABLE `userdb`.`XMLTable` (
   `XML` MEDIUMTEXT NULL,
   PRIMARY KEY (`id`));'''
 
-
 cur.execute(CREATE_TABLE)
 
 xmlData = None
