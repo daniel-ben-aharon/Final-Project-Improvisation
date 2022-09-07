@@ -1,0 +1,9 @@
+requests==2.21.0
+Flask==1.0.2
+oauthlib==3.0.1
+pyOpenSSL==19.0.0
+Flask-Login==0.4.1
+mysql-connector-python~=8.0.27
+oauth~=1.0.1
+music21~=7.1.0
+Authlib~=0.15.5
