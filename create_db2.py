@@ -17,7 +17,6 @@ CREATE_TABLE = '''CREATE TABLE `userdb`.`XMLTable` (
   `XML` MEDIUMTEXT NULL,
   PRIMARY KEY (`id`));'''
 
-
 cur.execute(CREATE_TABLE)
 
 xmlData = None
@@ -36,21 +35,3 @@ for filename in os.listdir(path_of_the_directory):
             mydb.commit()
             cur.execute('select * from XMLTable')
             #results = cur.fetchall()
-
-# #for result in results:
-# #    print(result)
-#
-#
-# #Q2 = "CREATE TABLE Scores (userId int PRIMARY KEY, FOREIGN KEY(userId) REFERENCES Users(id), file_content  ,uploaded_on)"
-# # # create database in mysql
-# # cursor.execute("CREATE DATABASE corpusdb")
-# #
-# # # my_cursor.execute("SHOW DATABASES")
-# # # for db in my_cursor:
-# # #    print(db)
-# # cursor.execute("CREATE TABLE musicFiles (`id` cINTEGER NOT NULL AUTO_INCREMENT,`file_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,`uploaded_on` datetime NOT NULL,`status` enum('1','0') COLLATE utf8_unicode_ci NOT NULL DEFAULT '1', PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;" )
-# # cursor.execute("SHOW TABLES")
-# # for table in cursor:
-# #     print(table)     # table[0] to get another formatt (without parantesis)
-# # #sqlStuff = "INSERT INFO users (name, email, age) VALUES (%s, %s, %s)"
-# # #record1 = ("John" , "john@codemy.com", 40)
