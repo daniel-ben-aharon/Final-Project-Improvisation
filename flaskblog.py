@@ -76,6 +76,7 @@ class Upload(db.Model):
     data = db.Column(db.LargeBinary)    # BLOB = Binary Large Object : use LargeBinary to store arbitrary binary data-type in DB
 
 # oauth config
+# https://www.youtube.com/watch?v=BfYsdNaHrps&ab_channel=Vuka
 oauth = OAuth(app)
 google = oauth.register(
     name='google',  # client_id=os.getenv("GOOGLE_CLIENT_ID"),
@@ -216,6 +217,7 @@ if __name__ == '__main__':
 
 
 #  To create a DB:
+#  https://www.youtube.com/watch?v=hQl2wyJvK5k&ab_channel=Codemy.com
 #  1.  Create Model  (Class)
 #  2.  Add command that add data to DB
 #  3.  Add command of commit:             db.session.commit()
