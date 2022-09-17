@@ -28,6 +28,8 @@ from datetime import datetime
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'  # arbitrary value
 
+
+
 Bootstrap(app)
 
 class LoginForm(FlaskForm):            # inherit from FlaskForm
