@@ -244,6 +244,3 @@ if __name__ == '__main__':
 #  4.  From terminal write the following commands:
 #     (i)  from flaskblog.py import db
 #     (ii) db.create_all()
-
-# s = converter.parse(r'C:\Users\Daniel ben aharon\Desktop\Final Project\charlie_parker\Cheryl.xml')
-# print(s)
