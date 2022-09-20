@@ -197,8 +197,8 @@ def signinPost():
        form.email.data = ''
        flash("User Added Successfully!")
        our_users = Users.query.order_by(Users.date_added)
-       return render_template("upload.html", form=form, name=name, user_id = user.id)
-   return render_template('signin.html')
+       return render_template("upload.html", name=name, user_id = user.id)
+   return render_template('signin.html',form=form)
 
 @app.route("/upload",methods=['GET'])
 def uploadGet():
