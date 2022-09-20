@@ -3,6 +3,9 @@ import requests
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, render_template, url_for, redirect, session, request, flash
 import music21
+import os
+
+
 
 charlie_parker_scores = ["Another_Hairdo.xml","Anthropology.xml","An_Oscar_For_Treadwell.xml","Au_Private_1.xml","Au_Private_2.xml","Back_Home_Blues.xml","Barbados.xml","Billies's_Bounce.xml","Bird_Gets_The_Worm.xml","Bloomdido.xml","Blues_For_Alice.xml","Blue_Bird.xml","Buzzy.xml","Card_Board.xml","Celerity.xml","Chasing_The_Bird.xml","Cheryl.xml","Chi_Chi.xml","Confirmation.xml","Cosmic_Rays.xml","Dewey_Square.xml","Diverse.xml","Donna_Lee.xml","KC_Blues.xml","Kim_1.xml","Kim_2.xml","Ko_Ko.xml","Laird_Baird.xml","Marmaduke.xml","Mohawk_1.xml","Mohawk_2.xml","Moose_The_Mooche.xml","My_Little_Suede_Shoes.xml","Now's_The_Time_1.xml","Now's_The_Time_2.xml","Ornithology.xml","Passport.xml","Perhaps.xml","Red_Cross.xml","Relaxing_With_Lee.xml","Scrapple_From_The_Apple.xml","Segment.xml","Shawnuff.xml","Si_Si.xml","Steeplechase.xml","The_Bird.xml","Thriving_From_A_Riff.xml","Visa.xml","Warming_Up_A_Riff.xml","Yardbird_Suite.xml"]
 ###   To run FLASK
@@ -209,12 +212,12 @@ def uploadGet():
 def uploadPost():
     print('upload post')
     file = request.files['file'] # input of algorithm
-
+    file.save(os.path.join(app.root_path,'static',file.filename))
     # algorithm should run here
     # some result music.
         
     music_xml = file # output of the algorithm
-    return render_template("verovio.html", music_xml=music_xml)
+    return render_template("verovio.html", music_xml=music_xml, filename=file.filename)
         # upload = Upload(filename = file.filename, data=file.read())
         # db.session.add(upload)
         # db.session.commit()
