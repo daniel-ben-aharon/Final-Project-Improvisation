@@ -1,4 +1,5 @@
 import oauth as oauth
+import requests
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, render_template, url_for, redirect, session, request, flash
 import music21
@@ -165,12 +166,21 @@ def login():
 
     return render_template('login.html',form=form)
 
+@app.route("/signin", methods=['GET'])        # register
+def signinGet():
+   form = RegisterForm()
 
-@app.route("/signin", methods=['GET', 'POST'])        # register
-def signin():
+   print('signin get')
+   
+   return render_template('signin.html',form=form)
+
+
+@app.route("/signin", methods=['POST'])        # register
+def signinPost():
    form = RegisterForm()
    name = None
-   if form.validate_on_submit():
+   print('signin')
+   if form and form.validate_on_submit():
        user = Users.query.filter_by(email=form.email.data).first()
        if user is None:
            user = Users(name=form.username.data, email=form.email.data, password=form.password.data)
@@ -190,11 +200,21 @@ def signin():
        return render_template("upload.html", form=form, name=name, user_id = user.id)
    return render_template('signin.html')
 
-@app.route("/upload",methods=['GET','POST'])
-def upload():
-    if request.method == 'POST':
-        file = request.files['file']
-        return f'Uploaded: {file.filename}'
+@app.route("/upload",methods=['GET'])
+def uploadGet():
+    print('uploadget')
+    return render_template("upload.html")
+
+@app.route("/uploaded",methods=['POST'])
+def uploadPost():
+    print('upload post')
+    file = request.files['file'] # input of algorithm
+
+    # algorithm should run here
+    # some result music.
+        
+    music_xml = file # output of the algorithm
+    return render_template("verovio.html", music_xml=music_xml)
         # upload = Upload(filename = file.filename, data=file.read())
         # db.session.add(upload)
         # db.session.commit()
