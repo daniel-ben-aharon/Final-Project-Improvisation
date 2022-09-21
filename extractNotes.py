@@ -19,13 +19,13 @@ def createDict(fileName):
 
     dict = {}
     myScore = converter.parse(fileName)
-    for inx in range(len(myScore.recurse().notes)):
-        item = myScore.recurse().notes[inx]
+    for inx in range(len(myScore.recurse().notesAndRests)):
+        item = myScore.recurse().notesAndRests[inx]
         seq = []
         j = 0
         if isinstance(item, chord.Chord):
             figure = item.figure
-            notes = myScore.recurse().notes[inx + 1:]
+            notes = myScore.recurse().notesAndRests[inx + 1:]
             while (j < len(notes)):
                 if not isinstance(notes[j], chord.Chord):
                     seq.append(notes[j])
@@ -45,7 +45,7 @@ def swap(list, pos1, pos2):
 
 
 dict = createDict('Anthropology.xml')
-# print(dict)
+print(dict)
 
 # Convert Duration into str of number
 def durationToInt(d):
@@ -73,8 +73,8 @@ for i in list(dict.values())[1]:
 
 #print(chordDuration)
 # [4.0, 4.0, 3.625, 2.875, 4.0, 1.625, 3.625, 2.5, 3.25, 4.0, 4.0, 2.5, 3.625, 2.0, 0.5, 4.0, 2.875, 4.0, 4.0, 1.833333333333333, 2.5, 4.0, 4.0, 4.0, 1.25, 2.875, 2.125, 4.0, 4.0, 2.0, 2.125, 4.0]
-randIndx = random.randint(1,len(list(dict.values())[0]))
-
+# randIndx = random.randint(1,len(list(dict.values())[0]))
+#
 # seqBm = list(dict.values())[1]
 # print(seqBm)
 # sortedSeq = sorted(chordDuration,reverse= True)
