@@ -1,7 +1,11 @@
 import oauth as oauth
+import requests
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, render_template, url_for, redirect, session, request, flash
 import music21
+import os
+
+
 
 charlie_parker_scores = ["Another_Hairdo.xml","Anthropology.xml","An_Oscar_For_Treadwell.xml","Au_Private_1.xml","Au_Private_2.xml","Back_Home_Blues.xml","Barbados.xml","Billies's_Bounce.xml","Bird_Gets_The_Worm.xml","Bloomdido.xml","Blues_For_Alice.xml","Blue_Bird.xml","Buzzy.xml","Card_Board.xml","Celerity.xml","Chasing_The_Bird.xml","Cheryl.xml","Chi_Chi.xml","Confirmation.xml","Cosmic_Rays.xml","Dewey_Square.xml","Diverse.xml","Donna_Lee.xml","KC_Blues.xml","Kim_1.xml","Kim_2.xml","Ko_Ko.xml","Laird_Baird.xml","Marmaduke.xml","Mohawk_1.xml","Mohawk_2.xml","Moose_The_Mooche.xml","My_Little_Suede_Shoes.xml","Now's_The_Time_1.xml","Now's_The_Time_2.xml","Ornithology.xml","Passport.xml","Perhaps.xml","Red_Cross.xml","Relaxing_With_Lee.xml","Scrapple_From_The_Apple.xml","Segment.xml","Shawnuff.xml","Si_Si.xml","Steeplechase.xml","The_Bird.xml","Thriving_From_A_Riff.xml","Visa.xml","Warming_Up_A_Riff.xml","Yardbird_Suite.xml"]
 ###   To run FLASK
@@ -27,6 +31,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'  # arbitrary value
+
+
 
 Bootstrap(app)
 
@@ -74,6 +80,7 @@ class Upload(db.Model):
     data = db.Column(db.LargeBinary)    # BLOB = Binary Large Object : use LargeBinary to store arbitrary binary data-type in DB
 
 # oauth config
+# https://www.youtube.com/watch?v=BfYsdNaHrps&ab_channel=Vuka
 oauth = OAuth(app)
 google = oauth.register(
     name='google',  # client_id=os.getenv("GOOGLE_CLIENT_ID"),
@@ -162,12 +169,21 @@ def login():
 
     return render_template('login.html',form=form)
 
+@app.route("/signin", methods=['GET'])        # register
+def signinGet():
+   form = RegisterForm()
 
-@app.route("/signin", methods=['GET', 'POST'])        # register
-def signin():
+   print('signin get')
+   
+   return render_template('signin.html',form=form)
+
+
+@app.route("/signin", methods=['POST'])        # register
+def signinPost():
    form = RegisterForm()
    name = None
-   if form.validate_on_submit():
+   print('signin')
+   if form and form.validate_on_submit():
        user = Users.query.filter_by(email=form.email.data).first()
        if user is None:
            user = Users(name=form.username.data, email=form.email.data, password=form.password.data)
@@ -184,14 +200,24 @@ def signin():
        form.email.data = ''
        flash("User Added Successfully!")
        our_users = Users.query.order_by(Users.date_added)
-       return render_template("upload.html", form=form, name=name, user_id = user.id)
-   return render_template('signin.html')
+       return render_template("upload.html", name=name, user_id = user.id)
+   return render_template('signin.html',form=form)
 
-@app.route("/upload",methods=['GET','POST'])
-def upload():
-    if request.method == 'POST':
-        file = request.files['file']
-        return f'Uploaded: {file.filename}'
+@app.route("/upload",methods=['GET'])
+def uploadGet():
+    print('uploadget')
+    return render_template("upload.html")
+
+@app.route("/uploaded",methods=['POST'])
+def uploadPost():
+    print('upload post')
+    file = request.files['file'] # input of algorithm
+    file.save(os.path.join(app.root_path,'static',file.filename))
+    # algorithm should run here
+    # some result music.
+        
+    music_xml = file # output of the algorithm
+    return render_template("verovio.html", music_xml=music_xml, filename=file.filename)
         # upload = Upload(filename = file.filename, data=file.read())
         # db.session.add(upload)
         # db.session.commit()
@@ -214,12 +240,10 @@ if __name__ == '__main__':
 
 
 #  To create a DB:
+#  https://www.youtube.com/watch?v=hQl2wyJvK5k&ab_channel=Codemy.com
 #  1.  Create Model  (Class)
 #  2.  Add command that add data to DB
 #  3.  Add command of commit:             db.session.commit()
 #  4.  From terminal write the following commands:
 #     (i)  from flaskblog.py import db
 #     (ii) db.create_all()
-
-# s = converter.parse(r'C:\Users\Daniel ben aharon\Desktop\Final Project\charlie_parker\Cheryl.xml')
-# print(s)

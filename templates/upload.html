@@ -20,70 +20,19 @@
         }
       </style>
 </head>
+
 <body>
+{% block content %}
+
     <div class="center">
-        <form method="POST" action="/" enctype="multipart/form-data">
+        <form method="post" action="/uploaded" enctype="multipart/form-data">
             <input type="file" name="file">
-            <button>Submit</button>
+            <button type="submit">Submit</button>
         </form>
     </div>
+{% endblock %}
+
 </body>
 </html>
 
 
-{% block content %}
-{% for message in get_flashed_messages() %}
-<div class="alert alert-warning alert-dismissible fade show" role="alert">
-    <h1>{{ message }}</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endfor %}
-
-
-{% if name %}
-<form class="form" id="myForm">
-    <input type="file" id="inpFile">
-    <br>
-    <button type="submit"> send to server</button>
-</form>
-
-    <h1>Hello user {{ user_id }}!!  upload file to server</h1>
-    <br/>
-
-    <br/><br/>
-
-
-{% else %}
-    <h1>User List:</h1>
-    <br/>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-
-        {{ form.name.label(class="form-label") }}
-
-        {{ form.name(class="form-control") }}
-        <br/>
-
-        {{ form.email.label(class="form-label ") }}
-
-        {{ form.email(class="form-control ") }}
-        <br/>
-
-        {{ form.password.label(class="form-label ") }}
-
-        {{ form.password(class="form-control ") }}
-        <br/>
-
-        {{ form.submit(class="brn brn-secondary") }}
-
-
-    </form>
-
-<br/><br/><br/>
-{% for our_user in our_users %}
-    {{ our_user.id }}. {{ our_user.name }} - {{ our_user.mail }} <br/>
-{% endfor %}
-
-{% endif %}
-
-{% endblock %}

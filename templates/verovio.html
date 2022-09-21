@@ -1,0 +1,53 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Verovio
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='signup.css')}}">
+{% endblock %}
+{% block content %}
+
+<div class="panel-body">
+    <div><button><a id="download" href="{{url_for('.static', filename=filename)}}">Download "{{ filename  }}"</a></button></div>
+    <div><button id="play">Play</button></div>
+
+
+
+    <div id="app" class="panel" style="border: 1px solid lightgray; min-height: 800px; visibility:hidden;"></div>
+</div>
+
+<script type="module">
+    import 'https://www.verovio.org/javascript/app/verovio-app.js';
+
+    // Create the app - here with an empty option object
+    const verovioApp =document.getElementById("app")
+    const app = new Verovio.App(verovioApp, {});
+
+    const musicXml = '{{ music_xml }}'
+    const fileName = '{{ filename }}'
+    console.log(musicXml)
+    
+    const playButton = document.getElementById('play');
+    playButton.addEventListener('click',()=>{
+      if(verovioApp.style.visibility == 'hidden'){
+        verovioApp.style.visibility = 'visible';
+      } else {
+        verovioApp.style.visibility = 'hidden';
+      }
+    })
+
+  // Load a file (MEI or MusicXML)
+   // fetch("https://www.verovio.org/editor/brahms.mei")
+    fetch("/static/"+fileName)
+        .then(function(response) {
+            return response.text();
+        })
+        .then(function(text) {
+            app.loadData(text);
+        });
+    </script> 
+{% endblock %}
