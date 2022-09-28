@@ -4,8 +4,18 @@ from authlib.integrations.flask_client import OAuth
 from flask import Flask, render_template, url_for, redirect, session, request, flash
 import music21
 import os
+import mysql.connector
 
+# connection to DB
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="123",
+    #passwd="danielmysql123benaharondb#&12*-a",
+    database="userdb"
+)
 
+db_cursor = mydb.cursor(buffered=True)
 
 charlie_parker_scores = ["Another_Hairdo.xml","Anthropology.xml","An_Oscar_For_Treadwell.xml","Au_Private_1.xml","Au_Private_2.xml","Back_Home_Blues.xml","Barbados.xml","Billies's_Bounce.xml","Bird_Gets_The_Worm.xml","Bloomdido.xml","Blues_For_Alice.xml","Blue_Bird.xml","Buzzy.xml","Card_Board.xml","Celerity.xml","Chasing_The_Bird.xml","Cheryl.xml","Chi_Chi.xml","Confirmation.xml","Cosmic_Rays.xml","Dewey_Square.xml","Diverse.xml","Donna_Lee.xml","KC_Blues.xml","Kim_1.xml","Kim_2.xml","Ko_Ko.xml","Laird_Baird.xml","Marmaduke.xml","Mohawk_1.xml","Mohawk_2.xml","Moose_The_Mooche.xml","My_Little_Suede_Shoes.xml","Now's_The_Time_1.xml","Now's_The_Time_2.xml","Ornithology.xml","Passport.xml","Perhaps.xml","Red_Cross.xml","Relaxing_With_Lee.xml","Scrapple_From_The_Apple.xml","Segment.xml","Shawnuff.xml","Si_Si.xml","Steeplechase.xml","The_Bird.xml","Thriving_From_A_Riff.xml","Visa.xml","Warming_Up_A_Riff.xml","Yardbird_Suite.xml"]
 ###   To run FLASK
@@ -22,7 +32,7 @@ charlie_parker_scores = ["Another_Hairdo.xml","Anthropology.xml","An_Oscar_For_T
 
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField   # BooleanField for checkbox
+from wtforms import StringField, PasswordField, SelectField,BooleanField   # BooleanField for checkbox
 from wtforms.validators import InputRequired, Email, Length
 
 from flask_mysqldb import MySQL
@@ -48,15 +58,19 @@ class RegisterForm(FlaskForm):
      password = PasswordField('password',validators=[InputRequired(), Length(min=8,max=80)])
      #create_time = PasswordField('password',validators=[InputRequired(), Length(min=8,max=80)])
 
+class ChosenXmlForm(FlaskForm):
+     xml_filename = SelectField('filename',validators=[InputRequired()])
+    
+   
 
 # configure to mysql database
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////users.db' # users is name of our DB
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:danielmysql123benaharondb#&12*-a@localhost/userdb' # userdb is name of our DB
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:123@localhost/userdb' # userdb is name of our DB
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['MYSQL_HOST'] = "localhost"
 app.config['MYSQL_USER'] = "root"
-app.config['MYSQL_PASSWORD'] = 'danielmysql123benaharondb#&12*-a'
+app.config['MYSQL_PASSWORD'] = '123'
 app.config['MYSQL_DB'] = 'userdb'
 db = SQLAlchemy(app)
 
@@ -180,28 +194,48 @@ def signinGet():
 
 @app.route("/signin", methods=['POST'])        # register
 def signinPost():
-   form = RegisterForm()
-   name = None
-   print('signin')
-   if form and form.validate_on_submit():
-       user = Users.query.filter_by(email=form.email.data).first()
-       if user is None:
-           user = Users(name=form.username.data, email=form.email.data, password=form.password.data)
-           # # Hash the password!!!
-           # hashed_pw = generate_password_hash(form.password_hash.data, "sha256")
-           # user = Users(username=form.username.data, name=form.name.data, email=form.email.data,password_hash=hashed_pw)
-           db.session.add(user)
-           db.session.commit()
-       name = form.username.data
+    form = RegisterForm()
+    name = None
+    print('signin post')
+    if form and form.validate_on_submit():
+        print(form.email.data)
+        query = 'SELECT * FROM users WHERE email="'+form.email.data + '"'
+        print(query)
+        user = db_cursor.execute(query)
+        print(user)
+        if user is None:
+            print('new user')
+            query = f'INSERT INTO users (name, email, password) VALUES ("{form.username.data}", "{form.email.data}", "{form.password.data}");'
+            print(query)
+            user = db_cursor.execute(query)
+            mydb.commit()
 
-       # clean the form
-       form.username.data = ''
-       form.password.data = ''
-       form.email.data = ''
-       flash("User Added Successfully!")
-       our_users = Users.query.order_by(Users.date_added)
-       return render_template("upload.html", name=name, user_id = user.id)
-   return render_template('signin.html',form=form)
+        name = form.username.data
+        email = form.email.data
+
+        # clean the form
+        form.username.data = ''
+        form.password.data = ''
+        form.email.data = ''
+        flash("User Added Successfully!")
+        #
+
+        query = 'SELECT * from xmltable2'
+        db_cursor.execute(query)
+        xmls = db_cursor.fetchall()
+
+        return render_template("profile.html", name=name, email=email,xmls=xmls)
+    return render_template('signin.html',form=form)
+
+@app.route("/profile", methods=['GET'])        # register
+def profile():
+    query = 'SELECT * from xmltable2'
+    db_cursor.execute(query)
+    xmls = db_cursor.fetchall()
+    for xml in xmls:
+        print(xml[1])
+    return render_template("profile.html", name='Anonymous', email='Anonymous',xmls=xmls)
+
 
 @app.route("/upload",methods=['GET'])
 def uploadGet():
@@ -213,11 +247,33 @@ def uploadPost():
     print('upload post')
     file = request.files['file'] # input of algorithm
     file.save(os.path.join(app.root_path,'static',file.filename))
+    
     # algorithm should run here
     # some result music.
+    # newFile = algo(file)
+    # newFile.save(os.path.join(app.root_path,'static',newFile.filename))
         
     music_xml = file # output of the algorithm
     return render_template("verovio.html", music_xml=music_xml, filename=file.filename)
+  
+
+@app.route("/chosen",methods=['POST'])
+def chosenXml():
+    print('chosenXml')
+    form = ChosenXmlForm()
+    xml_filename=form.xml_filename.data
+    print(xml_filename)
+    query = f'SELECT * from xmltable2 WHERE name="{xml_filename}"'
+    db_cursor.execute(query)
+    xml = db_cursor.fetchall()[0]
+    print(xml[1])
+    
+    # algorithm should run here
+    # some result music.
+    # newFile = algo(file)
+    # newFile.save(os.path.join(app.root_path,'static',newFile.filename))
+        
+    return render_template("verovio.html", music_xml=xml[2], filename=xml_filename)
         # upload = Upload(filename = file.filename, data=file.read())
         # db.session.add(upload)
         # db.session.commit()
@@ -247,3 +303,6 @@ if __name__ == '__main__':
 #  4.  From terminal write the following commands:
 #     (i)  from flaskblog.py import db
 #     (ii) db.create_all()
+
+# s = converter.parse(r'C:\Users\Daniel ben aharon\Desktop\Final Project\charlie_parker\Cheryl.xml')
+# print(s)
