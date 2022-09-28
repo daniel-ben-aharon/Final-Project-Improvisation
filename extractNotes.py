@@ -39,10 +39,8 @@ def createDict(fileName):
                 dict[figure] = [seq]
     return dict
 
-def swap(list, pos1, pos2):
-    list[pos1], list[pos2] = list[pos2], list[pos1]
-    return list
-
+def swap(a, b):
+    b, a = a, b
 
 dict = createDict('Anthropology.xml')
 print(dict)
