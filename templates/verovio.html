@@ -27,7 +27,7 @@ Verovio
     const verovioApp =document.getElementById("app")
     const app = new Verovio.App(verovioApp, {});
 
-    const musicXml = '{{ music_xml }}'
+    const musicXml = `{{ music_xml | safe }}`
     const fileName = '{{ filename }}'
     console.log(musicXml)
     
@@ -40,14 +40,16 @@ Verovio
       }
     })
 
+    app.loadData(musicXml)
+
   // Load a file (MEI or MusicXML)
    // fetch("https://www.verovio.org/editor/brahms.mei")
-    fetch("/static/"+fileName)
-        .then(function(response) {
-            return response.text();
-        })
-        .then(function(text) {
-            app.loadData(text);
-        });
+    // fetch("/static/"+fileName)
+    //     .then(function(response) {
+    //         return response.text();
+    //     })
+    //     .then(function(text) {
+    //         app.loadData(text);
+    //     });
     </script> 
 {% endblock %}
