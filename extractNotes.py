@@ -24,8 +24,8 @@ def createDict(fileName):
         seq = []
         j = 0
         if isinstance(item, chord.Chord):
+            chordOrder.append(item)
             figure = item.figure
-            chordOrder.append(figure)
             notes = myScore.recurse().notesAndRests[inx + 1:]
             while j < len(notes):
                 if not isinstance(notes[j], chord.Chord):
@@ -40,18 +40,8 @@ def createDict(fileName):
                 dict[figure] = [seq]
     return dict,chordOrder
 
-
-#charlie1 = converter.parse('Anthropology.xml')
-filename = 'Anthropology.xml'
+filename = 'Anthropology.xml'      # better recieve file's name from the user to prevent error code
 dictionary, chordsByOrder = createDict(filename)
-
-# val1 = list(dict.values())[0]
-#
-# seq1Val1 = val1[0]
-#
-# for note in seq1Val1:
-#     print(note)
-
 
 # Convert Duration into str of number
 def durationToInt(d):
@@ -61,7 +51,6 @@ def durationToInt(d):
         return '0.25'
     if d == 'Eighth':
         return '0.125'
-
 
 
 #Calculate each seq duration in dict values
@@ -84,20 +73,90 @@ for k in list(dictionary.keys()):
               if durationToInt(item.duration.fullName) is not None:
                 seqDuration = seqDuration + float(durationToInt(item.duration.fullName))
         chordDuration.append(seqDuration)
-    #
+
     # create list of list duration of each sequence in each key
     keysDurations.append(chordDuration)
 
 
-for l in list(keysDurations):
-   print(l)
-# [4.0, 4.0, 3.625, 2.875, 4.0, 1.625, 3.625, 2.5, 3.25, 4.0, 4.0, 2.5, 3.625, 2.0, 0.5, 4.0, 2.875, 4.0, 4.0, 1.833333333333333, 2.5, 4.0, 4.0, 4.0, 1.25, 2.875, 2.125, 4.0, 4.0, 2.0, 2.125, 4.0]
-# randIndx = random.randint(1,len(list(dict.values())[0]))
+###########################################################################################
+####################### get a chord by the user  ##########################################
+chosen_chord_Indx = 0    # by default for our improvisation algorithm
 
-# for d in chordDuration[1:]:
-#     if chordDuration[0] == d
-#         #  swap sequences
-#
-#
-# seqBm = list(dict.values())[1]
-# print(seqBm)
+#######################################################################################################
+##  lines 89-90, 104-105, 108 in comment - if we chose random sequence from all the possible options
+#######################################################################################################
+
+# locs = []    ## if we pick a random index
+# chosen chord
+for i in range(len(keysDurations[chosen_chord_Indx])):
+     item = (keysDurations[chosen_chord_Indx])[i]
+     try:
+         loc =  (keysDurations[chosen_chord_Indx]).index(item,i+1)
+     except ValueError:
+         pass
+     else:
+         if loc is not None:
+            swap_l = i       # first occurence seq - left index to swap
+            swap_r = loc     # second occurence seq - right index to swap
+            # if we pick randomly index
+            # loc.append(loc)
+            break
+
+# randIndx = locs[random.randint(0,locs)]  # pick one sequence randomally
+
+
+improvise_stream = stream.Stream()
+
+#####################################################################################
+#   Following code Lines Test show method only
+#####################################################################################
+
+#configure.run()  ## To use show() method - run this function once, choose No options and then put it on comment in next time
+
+chosen_chord = list(dictionary.keys())[chosen_chord_Indx]
+print(chosen_chord)
+
+i = 0    # index of seq of chosen_chord
+
+# # run over all chord of the original musicXML file by order
+for c in chordsByOrder:
+
+    # add Chord sign to the improvised music sheet
+    improvise_stream.append(c)
+
+    # gets Chord short name:  'F7', 'B-' etc.
+    chordName = c.figure
+
+    # copy the non-improvise parts the same as original
+    if chordName != chosen_chord:
+         # copy the suitable sequence
+         for item in (dictionary[chordName])[0]:
+            improvise_stream.append(item)
+
+         # delete it from original dict to copy from
+         del (dictionary[chordName])[0]
+
+
+     # if we reached to the improvised chord
+    else:
+        #  swap the sequence to improvise
+        if i == swap_l:
+            # copy the suitable sequence
+            for item in (dictionary[chordName])[swap_r]:
+                improvise_stream.append(item)
+            i += 1
+
+        elif i == swap_r:
+            # copy the suitable sequence
+            for item in (dictionary[chordName])[swap_l]:
+                improvise_stream.append(item)
+            i += 1
+
+        else:
+            # copy the suitable sequence
+            for item in (dictionary[chordName])[i]:
+                improvise_stream.append(item)
+            i += 1
+
+# Show the improvised music sheet (in musescore3)
+improvise_stream.show()
