@@ -16,7 +16,7 @@ def createDict(fileName):
         a dictionary where the key is the Chord
         and the value is sequence of notes play while chord plays
     """
-
+    chordOrder = []
     dict = {}
     myScore = converter.parse(fileName)
     for inx in range(len(myScore.recurse().notesAndRests)):
@@ -25,8 +25,9 @@ def createDict(fileName):
         j = 0
         if isinstance(item, chord.Chord):
             figure = item.figure
+            chordOrder.append(figure)
             notes = myScore.recurse().notesAndRests[inx + 1:]
-            while (j < len(notes)):
+            while j < len(notes):
                 if not isinstance(notes[j], chord.Chord):
                     seq.append(notes[j])
                     j += 1
@@ -37,13 +38,20 @@ def createDict(fileName):
                 dict[figure].append(seq)
             else:
                 dict[figure] = [seq]
-    return dict
+    return dict,chordOrder
 
-# def swap(a, b):
-#     b, a = a, b
 
-dict = createDict('Anthropology.xml')
-print(dict)
+#charlie1 = converter.parse('Anthropology.xml')
+filename = 'Anthropology.xml'
+dictionary, chordsByOrder = createDict(filename)
+
+# val1 = list(dict.values())[0]
+#
+# seq1Val1 = val1[0]
+#
+# for note in seq1Val1:
+#     print(note)
+
 
 # Convert Duration into str of number
 def durationToInt(d):
@@ -54,36 +62,42 @@ def durationToInt(d):
     if d == 'Eighth':
         return '0.125'
 
-# Calculate each seq duration in dict values
-#for k in dict.keys():
-chordDuration = []
-for i in list(dict.values())[1]:
-    duration = 0
-    for item in i:
-       #  if it is a note
-       if isinstance(item,note.Note):
-           duration = duration + float(item.quarterLength)
 
-       else:  # if it is a Rest
-           if durationToInt(item.duration.fullName) is not None:
-            duration = duration + float(durationToInt(item.duration.fullName))
-    chordDuration.append(duration)
 
-#print(chordDuration)
+#Calculate each seq duration in dict values
+keysDurations = []
+
+# for each key
+for k in list(dictionary.keys()):
+    chordDuration = []
+    # for each sequence
+    for seq in dictionary[k]:
+        # calculate duration of each sequance
+        seqDuration = 0
+        for item in seq:
+            #  if it is a note
+            if isinstance(item, note.Note):
+                seqDuration = seqDuration + float(item.quarterLength)
+
+            # if it is a Rest
+            else:
+              if durationToInt(item.duration.fullName) is not None:
+                seqDuration = seqDuration + float(durationToInt(item.duration.fullName))
+        chordDuration.append(seqDuration)
+    #
+    # create list of list duration of each sequence in each key
+    keysDurations.append(chordDuration)
+
+
+for l in list(keysDurations):
+   print(l)
 # [4.0, 4.0, 3.625, 2.875, 4.0, 1.625, 3.625, 2.5, 3.25, 4.0, 4.0, 2.5, 3.625, 2.0, 0.5, 4.0, 2.875, 4.0, 4.0, 1.833333333333333, 2.5, 4.0, 4.0, 4.0, 1.25, 2.875, 2.125, 4.0, 4.0, 2.0, 2.125, 4.0]
 # randIndx = random.randint(1,len(list(dict.values())[0]))
+
+# for d in chordDuration[1:]:
+#     if chordDuration[0] == d
+#         #  swap sequences
+#
 #
 # seqBm = list(dict.values())[1]
 # print(seqBm)
-# sortedSeq = sorted(chordDuration,reverse= True)
-# maxSeq = max(chordDuration)
-# maxIndex = chordDuration.index(maxSeq)
-# halfDurationIndex = chordDuration.index(maxSeq/2)
-#
-# if halfDuration == None:
-#     # swap max duration chord with min Duration and add suitable notes
-#     minSeq = min(chordDuration)
-#     minIndex = chordDuration.index(minSeq)
-# else:
-#     newMelody = [chordDuration[halfDurationIndex] chordDuration[halfDurationIndex]]
-#     improvisation = swap(chordDuration[halfDurationIndex] , chordDuration[maxIndex])
