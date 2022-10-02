@@ -1,6 +1,6 @@
 import oauth as oauth
-import requests
 from authlib.integrations.flask_client import OAuth
+
 from flask import Flask, render_template, url_for, redirect, session, request, flash
 import music21
 import os
@@ -105,29 +105,30 @@ google = oauth.register(
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     authorize_params=None,
     api_base_url='https://www.googleapis.com/oauth2/v1/',
-    # userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
-    # This is only needed if using openId to fetch user info
-    client_kwargs={'scope': 'openid email profile'},      #  scope=what we want google to give back using token and get method
+    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',  # This is only needed if using openId to fetch user info
+    client_kwargs={'scope': 'openid email profile'},
+    jwks_uri="https://www.googleapis.com/oauth2/v3/certs",
 )
 
 
 # route direct to if the authentication was successful
 @app.route('/authorize')
 def authorize():
+    google = oauth.create_client('google')  # create the google oauth client
     token = google.authorize_access_token()
+    print(token)
     resp = google.get('userinfo')
     resp.raise_for_status()
-    user_info = resp.json()   # {'id': '100273396375222979702', 'email': 'danielair100@gmail.com', 'verified_email': True, 'name': 'Daniel BA', 'given_name': 'Daniel', 'family_name': 'BA', 'picture': 'https://lh3.googleusercontent.com/a/AItbvmkMwn_Jf6bzv7k7nU23e9p-KfBfzUMZg9UbEXRS=s96-c', 'locale': 'he'}
+    # {'id': '100273396375222979702', 'email': 'danielair100@gmail.com', 'verified_email': True, 'name': 'Daniel BA', 'given_name': 'Daniel', 'family_name': 'BA', 'picture': 'https://lh3.googleusercontent.com/a/AItbvmkMwn_Jf6bzv7k7nU23e9p-KfBfzUMZg9UbEXRS=s96-c', 'locale': 'he'}
+    user_info = resp.json()   
+    print(user_info)
     # do something with the token and profile
 
     session['email'] = user_info['email']
-    #session['name'] = user_info['given_name']
+    session['name'] = user_info['name']
 
-    # check if user exists already
-    user = Users.query.filter_by(email= user_info['email']).first()
-    if user is None:
-         return render_template('signin.html')  # sign in if you don't have an account
-    return render_template("upload.html")
+    xmls = get_xmls()
+    return render_template("profile.html", name=user_info['name'], email=user_info['email'],xmls=xmls)
 
 
 @app.route('/submit-form', methods = ['POST'])
@@ -179,7 +180,20 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():    #  check to works if form is submitted
-        return '<h1>' + form.username.data + ' ' + form.password.data + '<h1>'
+        query = 'SELECT * FROM users WHERE name="'+form.username.data + '"'
+        print(query)
+        db_cursor.execute(query)
+        results = db_cursor.fetchall()
+        user = results[0]
+        print(user)
+        password = user[3]
+        if password == form.password.data:
+            print('user authenticated')
+            # clean the form
+            form.username.data = ''
+            form.password.data = ''
+            xmls = get_xmls()
+            return render_template("profile.html", name=user[1], email=user[2],xmls=xmls)
 
     return render_template('login.html',form=form)
 
@@ -218,11 +232,8 @@ def signinPost():
         form.password.data = ''
         form.email.data = ''
         flash("User Added Successfully!")
-        #
 
-        query = 'SELECT * from xmltable2'
-        db_cursor.execute(query)
-        xmls = db_cursor.fetchall()
+        xmls = get_xmls()
 
         return render_template("profile.html", name=name, email=email,xmls=xmls)
     return render_template('signin.html',form=form)
@@ -244,17 +255,20 @@ def uploadGet():
 
 @app.route("/uploaded",methods=['POST'])
 def uploadPost():
-    print('upload post')
-    file = request.files['file'] # input of algorithm
-    file.save(os.path.join(app.root_path,'static',file.filename))
     
+    file = request.files['file'] # input of algorithm
+    content = file.stream.read().decode('utf-8')
+    INSERT_QUERY = f"INSERT INTO XMLTable2 (XML, name) VALUES (%s, %s)"
+    values = (content, file.filename)
+    db_cursor.execute(INSERT_QUERY,values)
+    mydb.commit()
+    #file.save(os.path.join(app.root_path,'static',file.filename))
     # algorithm should run here
     # some result music.
     # newFile = algo(file)
     # newFile.save(os.path.join(app.root_path,'static',newFile.filename))
-        
-    music_xml = file # output of the algorithm
-    return render_template("verovio.html", music_xml=music_xml, filename=file.filename)
+    
+    return render_template("verovio.html", music_xml=content, filename=file.filename)
   
 
 @app.route("/chosen",methods=['POST'])
@@ -289,6 +303,14 @@ def logout():
 @app.route("/about")
 def about():
     return render_template('about.html', title='About')
+
+
+
+def get_xmls():
+    query = 'SELECT * from xmltable2'
+    db_cursor.execute(query)
+    xmls = db_cursor.fetchall()
+    return xmls
 
 
 if __name__ == '__main__':
