@@ -32,11 +32,17 @@
   <br>
   <span>choose a musicXML file to improvise on: </span>
   <div class="center">
-        <!-- <form method="post" action="/uploaded" enctype="multipart/form-data">
+    
+        <div>
+          <button id="upload-file-button">Upload file from your computer for improvisation</button>
+        </div>
+        <form id="upload-file" style="visibility: hidden;" method="post" action="/uploaded" enctype="multipart/form-data">
             <input type="file" name="file">
             <button type="submit">Submit</button>
-        </form> -->
-    <div><button id="play">Choose file for improvisation</button></div>
+            <br/>
+            <br/>
+        </form>
+    <div><button id="play">Choose file from database for improvisation</button></div>
         <div id="xml-list" style="visibility: hidden;">
 
           <form id="chosenForm" action="/chosen" method="post">
@@ -60,6 +66,16 @@
             xmlList.style.visibility = 'visible';
           } else {
             xmlList.style.visibility = 'hidden';
+          }
+        })
+
+      const uploadForm = document.getElementById('upload-file')
+      const uploadFileButton = document.getElementById('upload-file-button');
+      uploadFileButton.addEventListener('click', ()=>{
+          if(uploadForm.style.visibility == 'hidden'){
+            uploadForm.style.visibility = 'visible';
+          } else {
+            uploadForm.style.visibility = 'hidden';
           }
         })
     </script>
