@@ -96,7 +96,7 @@ def improvise(filename):
 
 
 #######################################################################################################
-##  lines 91, 103-104, 107 in comment - if we chose random sequence from all the possible options
+##  lines 101, 113-114, 117 in comment - if we chose random sequence from all the possible options
 #######################################################################################################
   # locs = []    # if we pick a random index
   # chosen chord
@@ -176,7 +176,7 @@ def improvise(filename):
 
   # Show the improvised music sheet (in musescore3)
   improvise_stream.show()
-  play(improvise_stream)
+
 #######################################################################################################################
 ##################################  Test improvise function  ##########################################################
 #######################################################################################################################
