@@ -1,6 +1,8 @@
 import oauth as oauth
 from authlib.integrations.flask_client import OAuth
 
+from extractNotes import improvise
+
 from flask import Flask, render_template, url_for, redirect, session, request, flash
 import music21
 import os
@@ -262,13 +264,19 @@ def uploadPost():
     values = (content, file.filename)
     db_cursor.execute(INSERT_QUERY,values)
     mydb.commit()
+
+    improv = improvise(file.filename, content)
+    INSERT_QUERY = f"INSERT INTO improvs (XML, name) VALUES (%s, %s)"
+    improv_values = (improv, file.filename)
+    db_cursor.execute(INSERT_QUERY,improv_values)
+    mydb.commit()
     #file.save(os.path.join(app.root_path,'static',file.filename))
     # algorithm should run here
     # some result music.
     # newFile = algo(file)
     # newFile.save(os.path.join(app.root_path,'static',newFile.filename))
     
-    return render_template("verovio.html", music_xml=content, filename=file.filename)
+    return render_template("verovio.html", music_xml=improv, filename=file.filename)
   
 
 @app.route("/chosen",methods=['POST'])
@@ -280,17 +288,20 @@ def chosenXml():
     query = f'SELECT * from xmltable2 WHERE name="{xml_filename}"'
     db_cursor.execute(query)
     xml = db_cursor.fetchall()[0]
-    print(xml[1])
+    
+    original_music_xml = xml[2]
+    improv = improvise(xml_filename, original_music_xml)
+    INSERT_QUERY = f"INSERT INTO improvs (XML, name) VALUES (%s, %s)"
+    improv_values = (improv, xml_filename)
+    db_cursor.execute(INSERT_QUERY,improv_values)
+    mydb.commit()
     
     # algorithm should run here
     # some result music.
     # newFile = algo(file)
     # newFile.save(os.path.join(app.root_path,'static',newFile.filename))
         
-    return render_template("verovio.html", music_xml=xml[2], filename=xml_filename)
-        # upload = Upload(filename = file.filename, data=file.read())
-        # db.session.add(upload)
-        # db.session.commit()
+    return render_template("verovio.html", music_xml=improv, filename=xml_filename)
 
 
 @app.route('/logout')

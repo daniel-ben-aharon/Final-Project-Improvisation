@@ -2,7 +2,7 @@ from music21 import *
 import random
 
 
-def createDict(fileName):
+def createDict(file_name, file_content):
     """Gets musicXML file name and create a dictionary from it
        here the key is the Chord and the value is sequence of notes play while chord plays
 
@@ -19,17 +19,8 @@ def createDict(fileName):
     """
     chordOrder = []
     dict = {}
-    myScore = converter.parse(fileName)
-    #tempo_f = myScore.getElementsByClass('Stream.stream')
-
+    myScore = converter.parseData(file_content)
     tempo_f = myScore.getElementsByClass('tempo.MetronomeMark')
-    #
-    # print(myScore.getElementsByClass('tempo.MetronomeMart').__getattribute__())
-    # tempo.MetronomeMark('slow').number
-    #r = tempo_f.getElementsByClass('MetronomeMark').number
-    #print(r)
-    #tempo_f = myScore.getElementsByClass('MetronomeMark')['number']
-    #print(tempo_f.number)
 
     for inx in range(len(myScore.recurse().notesAndRests)):
         item = myScore.recurse().notesAndRests[inx]
@@ -50,7 +41,7 @@ def createDict(fileName):
                 dict[figure].append(seq)
             else:
                 dict[figure] = [seq]
-    return dict,chordOrder,tempo_f
+    return dict,chordOrder
 
 # Convert Duration into str of number
 def durationToInt(d):
@@ -62,10 +53,10 @@ def durationToInt(d):
         return '0.125'
 
 
-def improvise(filename):
+def improvise(file_name, file_content = ''):
   #Calculate each seq duration in dict values
-  dictionary, chordsByOrder, old_tempo = createDict(filename)
-  title_music_sheet = filename.split(".")[0]
+  dictionary, chordsByOrder = createDict(file_name, file_content)
+  title_music_sheet = file_name.split(".")[0]
   keysDurations = []
   # for each key
   for k in list(dictionary.keys()):
@@ -88,17 +79,16 @@ def improvise(filename):
     # create list of list duration of each sequence in each key
     keysDurations.append(chordDuration)
 
-###########################################################################################
-####################### get a chord by the user  ##########################################
+  ###########################################################################################
+  ####################### get a chord by the user  ##########################################
   chosen_chord_Indx = 0  # by default for our improvisation algorithm
 
 
 
 
-#######################################################################################################
-##  lines 101, 113-114, 117 in comment - if we chose random sequence from all the possible options
-#######################################################################################################
-  # locs = []    # if we pick a random index
+    #######################################################################################################
+    ##  lines 101, 113-114, 117 in comment - if we chose random sequence from all the possible options
+    #######################################################################################################
   # chosen chord
   for i in range(len(keysDurations[chosen_chord_Indx])):
       item = (keysDurations[chosen_chord_Indx])[i]
@@ -128,7 +118,7 @@ def improvise(filename):
 
   improvise_stream.insert(0, metadata.Metadata())
   improvise_stream.metadata.composer = " "  # we should change it to modulary
-# configure.run()  ## To use show() method - run this function once, choose No options and then put it on comment in next time
+  # configure.run()  ## To use show() method - run this function once, choose No options and then put it on comment in next time
 
   chosen_chord = list(dictionary.keys())[chosen_chord_Indx]
 
@@ -175,11 +165,21 @@ def improvise(filename):
               indx += 1
 
   # Show the improvised music sheet (in musescore3)
-  improvise_stream.show()
+  temp_file_name = 'temp.musicxml'
+  improvise_stream.write('musicxml', temp_file_name)
+  temp_file = open(temp_file_name, 'r')
+  file_content = temp_file.read()
+  return file_content
+  
+  
 
 #######################################################################################################################
 ##################################  Test improvise function  ##########################################################
 #######################################################################################################################
 
-filename = 'Anthropology.xml'      # better recieve file's name from the user to prevent error code
-improvise(filename)
+if __name__ == '__main__':
+    file_name = 'Another_Hairdo.xml'      # better recieve file's name from the user to prevent error code
+    file = open(file_name, 'r')
+    file_content = file.read()
+    result = improvise(file_name, file_content)
+    print(result)
