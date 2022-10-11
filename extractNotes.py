@@ -8,14 +8,20 @@ def createDict(file_name, file_content):
 
     Parameter
     ----------
-    fileName : str
+    file_name : str
         The file name of the musicXML file with suffix (.xml)
 
+    file_content:  str
+         File content
+         
     Returns
     -------
     dict
         a dictionary where the key is the Chord
         and the value is sequence of notes play while chord plays
+        
+    chordByOrder:  list
+        list of all music file's chords by the original order
     """
     chordOrder = []
     dict = {}
