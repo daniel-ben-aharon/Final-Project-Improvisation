@@ -1,6 +1,8 @@
 from music21 import *
 import random
+import xml.etree.ElementTree as et
 
+temp_file_name2 = 'temp2.musicxml'
 
 def createDict(file_name, file_content):
     """Gets musicXML file name and create a dictionary from it
@@ -20,6 +22,7 @@ def createDict(file_name, file_content):
     chordOrder = []
     dict = {}
     myScore = converter.parseData(file_content)
+    myScore.write('musicxml', temp_file_name2)
     tempo_f = myScore.getElementsByClass('tempo.MetronomeMark')
 
     for inx in range(len(myScore.recurse().notesAndRests)):
@@ -83,9 +86,6 @@ def improvise(file_name, file_content = ''):
   ####################### get a chord by the user  ##########################################
   chosen_chord_Indx = 0  # by default for our improvisation algorithm
 
-
-
-
     #######################################################################################################
     ##  lines 101, 113-114, 117 in comment - if we chose random sequence from all the possible options
     #######################################################################################################
@@ -118,13 +118,16 @@ def improvise(file_name, file_content = ''):
 
   improvise_stream.insert(0, metadata.Metadata())
   improvise_stream.metadata.composer = " "  # we should change it to modulary
+  
   # configure.run()  ## To use show() method - run this function once, choose No options and then put it on comment in next time
 
   chosen_chord = list(dictionary.keys())[chosen_chord_Indx]
 
   indx = 0  # index of seq of chosen_chord
-  # swap_l = 0
-  # swap_r = 0
+  swap_l = 0
+  swap_r = 0
+  
+  
   # run over all chord of the original musicXML file by order
   for c in chordsByOrder:
       # add Chord sign to the improvised music sheet
@@ -167,11 +170,14 @@ def improvise(file_name, file_content = ''):
   # Show the improvised music sheet (in musescore3)
   temp_file_name = 'temp.musicxml'
   improvise_stream.write('musicxml', temp_file_name)
+  temp_file_name3 = 'temp3.musicxml'
+
   temp_file = open(temp_file_name, 'r')
   file_content = temp_file.read()
-  return file_content
+  updated = file_content.replace('<part-name />','<part-name>p</part-name>')
   
-  
+
+  return updated
 
 #######################################################################################################################
 ##################################  Test improvise function  ##########################################################

@@ -264,6 +264,7 @@ def uploadPost():
     values = (content, file.filename)
     db_cursor.execute(INSERT_QUERY,values)
     mydb.commit()
+    
 
     improv = improvise(file.filename, content)
     INSERT_QUERY = f"INSERT INTO improvs (XML, name) VALUES (%s, %s)"
