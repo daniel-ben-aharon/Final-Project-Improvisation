@@ -277,7 +277,7 @@ def uploadPost():
     # newFile = algo(file)
     # newFile.save(os.path.join(app.root_path,'static',newFile.filename))
     
-    return render_template("verovio.html", music_xml=improv, filename=file.filename)
+    return render_template("verovio.html", music_xml_improv=improv, music_xml_original=content, filename=file.filename)
   
 
 @app.route("/chosen",methods=['POST'])
@@ -302,7 +302,7 @@ def chosenXml():
     # newFile = algo(file)
     # newFile.save(os.path.join(app.root_path,'static',newFile.filename))
         
-    return render_template("verovio.html", music_xml=improv, filename=xml_filename)
+    return render_template("verovio.html", music_xml_improv=improv,music_xml_original=original_music_xml, filename=xml_filename)
 
 
 @app.route('/logout')

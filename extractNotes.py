@@ -2,8 +2,6 @@ from music21 import *
 import random
 import xml.etree.ElementTree as et
 
-temp_file_name2 = 'temp2.musicxml'
-
 def createDict(file_name, file_content):
     """Gets musicXML file name and create a dictionary from it
        here the key is the Chord and the value is sequence of notes play while chord plays
@@ -28,7 +26,6 @@ def createDict(file_name, file_content):
     chordOrder = []
     dict = {}
     myScore = converter.parseData(file_content)
-    myScore.write('musicxml', temp_file_name2)
     tempo_f = myScore.getElementsByClass('tempo.MetronomeMark')
 
     for inx in range(len(myScore.recurse().notesAndRests)):

@@ -1,69 +1,17 @@
 {% extends "layout.html" %}
-<!--{% block content %}-->
 
 <html>
     <head><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> </head>
     <body>
+          {% block content %}
+
             <div class="g-signin2" data-width="300" data-height="200" data-longtitle="true">
-                <form class="form" id="form">
-                    <input type="file" id="inpFile">
-                    <br>
-                    <button type="submit"> send to server</button>
-                </form>
+                <div><img src="{{ url_for('static',filename='music_free_logo.png')}}" alt="logo"></div>
+                <h1>Welcome to music improvisation platform</h1>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Saepe minus facere nostrum distinctio quia eos aut praesentium totam, officia perferendis nemo molestias cupiditate repudiandae nulla placeat ipsam ipsum alias incidunt recusandae minima debitis amet dolorum animi! Iste, porro suscipit alias sed nulla vero itaque harum deserunt obcaecati at voluptas debitis ratione aut totam magnam reprehenderit distinctio hic officiis! Nam porro corrupti ullam quos, debitis repudiandae. Quasi excepturi unde quod officia mollitia voluptatem saepe deserunt ad aliquid expedita ullam odio porro tenetur enim cumque, cupiditate perferendis voluptates consequatur, voluptate alias eveniet fuga adipisci ab. Quasi dolores repudiandae repellendus, doloribus nisi accusantium.</p>
             </div>
+          {% endblock %}
+
     </body>
 </html>
 
-<form method="POST" action=>
-    Name <input type="text" name="name"/>
-    <br>
-    Email <input type="email" name="email"/>
-    <br>
-<!--    <input type="submit">-->
-</form>
-<div class="panel-body">
-   <div id="app" class="panel" style="border: 1px solid lightgray; min-height: 800px;"></div>
-</div>
-
-</script>
-
-<html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home page</title>
-    <style>
-        body {
-          margin: 0;
-        }
-
-        .center {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-        }
-      </style>
-</head>
-<body>
-
-<div class="center">
-
-    <span>choose a musicXML file to improvise on: </span>
-    <br>
-    <select  name=scores>
-     {% for o in data %}
-       <option value="{{ o }}"> {{ o}}</option>
-     {% endfor %}
-    </select>
-
-    <form method="POST" action="/" enctype="multipart/form-data">
-            <button>Improvise</button>
-    </form>
-
-</div>
-</body>
-</html>
-<!--{% endblock content%}-->
