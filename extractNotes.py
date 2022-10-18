@@ -26,7 +26,7 @@ def createDict(file_name, file_content):
     chordOrder = []
     dict = {}
     myScore = converter.parseData(file_content)
-    tempo_f = myScore.getElementsByClass('tempo.MetronomeMark')
+    #tempo_f = myScore.getElementsByClass('tempo.MetronomeMark')
 
     for inx in range(len(myScore.recurse().notesAndRests)):
         item = myScore.recurse().notesAndRests[inx]
@@ -59,7 +59,7 @@ def durationToInt(d):
         return '0.125'
 
 
-def improvise(file_name, file_content = ''):
+def improvise(file_name, file_content = '', speed = 150 ):
   #Calculate each seq duration in dict values
   dictionary, chordsByOrder = createDict(file_name, file_content)
   title_music_sheet = file_name.split(".")[0]
@@ -73,14 +73,10 @@ def improvise(file_name, file_content = ''):
         seqDuration = 0
         for item in seq:
             #  if it is a note
-            if isinstance(item, note.Note):
-                seqDuration = seqDuration + float(item.quarterLength)
+            for item in seq:
+                seqDuration = seqDuration + float(item.duration.quarterLength)
 
-            # if it is a Rest
-            else:
-                if durationToInt(item.duration.fullName) is not None:
-                    seqDuration = seqDuration + float(durationToInt(item.duration.fullName))
-        chordDuration.append(seqDuration)
+            chordDuration.append(seqDuration)
 
     # create list of list duration of each sequence in each key
     keysDurations.append(chordDuration)
@@ -92,6 +88,8 @@ def improvise(file_name, file_content = ''):
     #######################################################################################################
     ##  lines 101, 113-114, 117 in comment - if we chose random sequence from all the possible options
     #######################################################################################################
+  swap_l = 0
+  swap_r= 0
   # chosen chord
   for i in range(len(keysDurations[chosen_chord_Indx])):
       item = (keysDurations[chosen_chord_Indx])[i]
@@ -111,10 +109,11 @@ def improvise(file_name, file_content = ''):
 
 
   improvise_stream = stream.Stream()
+  ##############################################################################################################
+  # another parameter improvisation - fast  (the value of number controls the fast. In the line below it is 150)
+  #############################################################################################################
+  improvise_stream.append(tempo.MetronomeMark(number=speed))
 
-  # another parameter improvisation - fast
-  #improvise_stream.append(tempo.MetronomeMark(number=150))
-  #improvise_stream.append(old_tempo)
   # update title name
   improvise_stream.insert(0, metadata.Metadata())
   improvise_stream.metadata.title = 'Improvised - ' + title_music_sheet
@@ -127,9 +126,6 @@ def improvise(file_name, file_content = ''):
   chosen_chord = list(dictionary.keys())[chosen_chord_Indx]
 
   indx = 0  # index of seq of chosen_chord
-  swap_l = 0
-  swap_r = 0
-  
   
   # run over all chord of the original musicXML file by order
   for c in chordsByOrder:
@@ -171,15 +167,14 @@ def improvise(file_name, file_content = ''):
               indx += 1
 
   # Show the improvised music sheet (in musescore3)
+  ###############33 how do we know temp_file_name is the improve file?#############3
   temp_file_name = 'temp.musicxml'
   improvise_stream.write('musicxml', temp_file_name)
-  temp_file_name3 = 'temp3.musicxml'
-
   temp_file = open(temp_file_name, 'r')
   file_content = temp_file.read()
   updated = file_content.replace('<part-name />','<part-name>p</part-name>')
   
-
+  
   return updated
 
 #######################################################################################################################
@@ -192,3 +187,4 @@ if __name__ == '__main__':
     file_content = file.read()
     result = improvise(file_name, file_content)
     print(result)
+

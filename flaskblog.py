@@ -5,6 +5,7 @@ from extractNotes import improvise
 
 from flask import Flask, render_template, url_for, redirect, session, request, flash
 import music21
+from music21 import *
 import os
 import mysql.connector
 
@@ -34,7 +35,7 @@ charlie_parker_scores = ["Another_Hairdo.xml","Anthropology.xml","An_Oscar_For_T
 
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField,BooleanField   # BooleanField for checkbox
+from wtforms import StringField, PasswordField, SelectField, BooleanField
 from wtforms.validators import InputRequired, Email, Length
 
 from flask_mysqldb import MySQL
@@ -62,6 +63,7 @@ class RegisterForm(FlaskForm):
 
 class ChosenXmlForm(FlaskForm):
      xml_filename = SelectField('filename',validators=[InputRequired()])
+     speed = StringField('speed',validators=[InputRequired()])
     
    
 
@@ -259,6 +261,8 @@ def uploadGet():
 def uploadPost():
     
     file = request.files['file'] # input of algorithm
+    speed = int(request.form.get('speed'))
+    print(speed)
     content = file.stream.read().decode('utf-8')
     INSERT_QUERY = f"INSERT INTO XMLTable2 (XML, name) VALUES (%s, %s)"
     values = (content, file.filename)
@@ -266,7 +270,7 @@ def uploadPost():
     mydb.commit()
     
 
-    improv = improvise(file.filename, content)
+    improv = improvise(file.filename, content, speed)
     INSERT_QUERY = f"INSERT INTO improvs (XML, name) VALUES (%s, %s)"
     improv_values = (improv, file.filename)
     db_cursor.execute(INSERT_QUERY,improv_values)
@@ -285,13 +289,15 @@ def chosenXml():
     print('chosenXml')
     form = ChosenXmlForm()
     xml_filename=form.xml_filename.data
-    print(xml_filename)
+    speed = int(form.speed.data)
+    print(speed)
     query = f'SELECT * from xmltable2 WHERE name="{xml_filename}"'
     db_cursor.execute(query)
     xml = db_cursor.fetchall()[0]
+   
     
     original_music_xml = xml[2]
-    improv = improvise(xml_filename, original_music_xml)
+    improv = improvise(xml_filename, original_music_xml, speed)
     INSERT_QUERY = f"INSERT INTO improvs (XML, name) VALUES (%s, %s)"
     improv_values = (improv, xml_filename)
     db_cursor.execute(INSERT_QUERY,improv_values)
