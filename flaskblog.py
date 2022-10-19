@@ -334,7 +334,6 @@ def get_xmls():
 if __name__ == '__main__':
     app.run(debug=True)
 
-
 #  To create a DB:
 #  https://www.youtube.com/watch?v=hQl2wyJvK5k&ab_channel=Codemy.com
 #  1.  Create Model  (Class)
@@ -343,6 +342,3 @@ if __name__ == '__main__':
 #  4.  From terminal write the following commands:
 #     (i)  from flaskblog.py import db
 #     (ii) db.create_all()
-
-# s = converter.parse(r'C:\Users\Daniel ben aharon\Desktop\Final Project\charlie_parker\Cheryl.xml')
-# print(s)
