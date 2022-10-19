@@ -1,39 +1,44 @@
+import re                 # for regular expressions
+import mysql.connector
 from music21 import *
 import random
 import xml.etree.ElementTree as et
+import time
 
-def createDict(file_name, file_content):
+#  To load dictionary:
+# with open('mydict.txt') as f:
+#     lines = f.readlines()
+#
+# dictionary = ((str(lines))[2:len(lines)-3])
+
+dictionary = {}
+chordOrder = []
+durations_dictionary = {}
+
+# Each time we add a musicXML file we add its data to our dictionary
+def add2Dict(file_content, file_name, chosen_file_name):
     """Gets musicXML file name and create a dictionary from it
        here the key is the Chord and the value is sequence of notes play while chord plays
 
     Parameter
     ----------
-    file_name : str
-        The file name of the musicXML file with suffix (.xml)
+    chosen_file_name : str
+        The file name of the musicXML file to improvised on with a suffix (.xml)
 
     file_content:  str
          File content
-         
-    Returns
-    -------
-    dict
-        a dictionary where the key is the Chord
-        and the value is sequence of notes play while chord plays
-        
-    chordByOrder:  list
-        list of all music file's chords by the original order
     """
-    chordOrder = []
-    dict = {}
-    myScore = converter.parseData(file_content)
-    #tempo_f = myScore.getElementsByClass('tempo.MetronomeMark')
+
+    myScore = converter.parse(file_content)
 
     for inx in range(len(myScore.recurse().notesAndRests)):
         item = myScore.recurse().notesAndRests[inx]
         seq = []
         j = 0
         if isinstance(item, chord.Chord):
-            chordOrder.append(item)
+            if file_name == chosen_file_name:
+                chordOrder.append(item)
+
             figure = item.figure
             notes = myScore.recurse().notesAndRests[inx + 1:]
             while j < len(notes):
@@ -43,148 +48,145 @@ def createDict(file_name, file_content):
                 else:
                     break
 
-            if figure in dict:
-                dict[figure].append(seq)
+            if figure in dictionary:
+                dictionary[figure].append(seq)
             else:
-                dict[figure] = [seq]
-    return dict,chordOrder
-
-# Convert Duration into str of number
-def durationToInt(d):
-    if d == 'Half':
-        return '0.5'
-    if d == 'Quarter':
-        return '0.25'
-    if d == 'Eighth':
-        return '0.125'
+                dictionary[figure] = [seq]    # tuple([seq],file_name)
 
 
-def improvise(file_name, file_content = '', speed = 150 ):
-  #Calculate each seq duration in dict values
-  dictionary, chordsByOrder = createDict(file_name, file_content)
-  title_music_sheet = file_name.split(".")[0]
-  keysDurations = []
-  # for each key
-  for k in list(dictionary.keys()):
-    chordDuration = []
-    # for each sequence
-    for seq in dictionary[k]:
-        # calculate duration of each sequance
-        seqDuration = 0
-        for item in seq:
-            #  if it is a note
+def improvise(file_name,file_content='', speed=150):
+    # Calculate each seq duration in dict values
+    durationDict = {}
+    keyDurationsDict = {}
+    # for each key
+    for k in list(dictionary.keys()):
+        chordDuration = []
+        # for each sequence
+        for seq in dictionary[k]:
+            # calculate duration of each sequence
+            seqDuration = 0
             for item in seq:
-                seqDuration = seqDuration + float(item.duration.quarterLength)
+               seqDuration = seqDuration + float(item.duration.quarterLength)
 
             chordDuration.append(seqDuration)
 
-    # create list of list duration of each sequence in each key
-    keysDurations.append(chordDuration)
+        # create list of list duration of each sequence in each key
+        keyDurationsDict[k] = chordDuration
 
-  ###########################################################################################
-  ####################### get a chord by the user  ##########################################
-  chosen_chord_Indx = 0  # by default for our improvisation algorithm
+    #print(f"keyDurationsDict: {keyDurationsDict}")
+    improvise_stream = stream.Stream()
+    improvise_stream.append(tempo.MetronomeMark(number=speed))
 
-    #######################################################################################################
-    ##  lines 101, 113-114, 117 in comment - if we chose random sequence from all the possible options
-    #######################################################################################################
-  swap_l = 0
-  swap_r= 0
-  # chosen chord
-  for i in range(len(keysDurations[chosen_chord_Indx])):
-      item = (keysDurations[chosen_chord_Indx])[i]
-      try:
-          loc = (keysDurations[chosen_chord_Indx]).index(item, i + 1)
-      except ValueError:
-          pass
-      else:
-          if loc is not None:
-              swap_l = i  # first occurence seq - left index to swap
-              swap_r = loc  # second occurence seq - right index to swap
-              # if we pick randomly index
-              # loc.append(loc)
-              break
+    # update title name
+    improvise_stream.insert(0, metadata.Metadata())
+    improvise_stream.metadata.title = 'Improvised - ' + chosen_file_name
 
-  # randIndx = locs[random.randint(0,locs)]  # pick one sequence randomally
+    improvise_stream.insert(0, metadata.Metadata())
+    improvise_stream.metadata.composer = " "  # we should change it to modulary
 
+    # configure.run()  ## To use show() method - run this function once, choose No options and then put it on comment in next time
 
-  improvise_stream = stream.Stream()
-  ##############################################################################################################
-  # another parameter improvisation - fast  (the value of number controls the fast. In the line below it is 150)
-  #############################################################################################################
-  improvise_stream.append(tempo.MetronomeMark(number=speed))
+    # chosen_chord = list(dictionary.keys())[chosen_chord_Indx]
 
-  # update title name
-  improvise_stream.insert(0, metadata.Metadata())
-  improvise_stream.metadata.title = 'Improvised - ' + title_music_sheet
+    # run over all chord of the original musicXML file by order
+    currentChordIndx = 0
+    idx = 1
+    #print(f"dictionary: {dictionary}")
+    # loop over all chords in chosen file by order
+    # for c in chordOrder:
 
-  improvise_stream.insert(0, metadata.Metadata())
-  improvise_stream.metadata.composer = " "  # we should change it to modulary
-  
-  # configure.run()  ## To use show() method - run this function once, choose No options and then put it on comment in next time
+    for c in chordOrder:
 
-  chosen_chord = list(dictionary.keys())[chosen_chord_Indx]
+       indexesSameDuration = []
+       currentSeqDurationList = []
+       # add Chord sign to the improvised music sheet
+       improvise_stream.append(c)
 
-  indx = 0  # index of seq of chosen_chord
-  
-  # run over all chord of the original musicXML file by order
-  for c in chordsByOrder:
-      # add Chord sign to the improvised music sheet
-      improvise_stream.append(c)
-
-      # gets Chord short name:  'F7', 'B-' etc.
-      chordName = c.figure
-
-      # copy the non-improvise parts the same as original
-      if chordName != chosen_chord:
-          # copy the suitable sequence
-          for item in (dictionary[chordName])[0]:
-              improvise_stream.append(item)
-
-          # delete it from original dict to copy from
-          del (dictionary[chordName])[0]
+       # gets Chord short name: 'F7', 'B-' etc.
+       chordName = c.figure
 
 
-      # if we reached to the improvised chord
-      else:
-          #  swap the sequence to improvise
-          if indx == swap_l:
-              # copy the suitable sequence
-              for item in (dictionary[chordName])[swap_r]:
-                  improvise_stream.append(item)
-              indx += 1
+       currentSeqDurationList = keyDurationsDict[chordName]
 
-          elif indx == swap_r:
-              # copy the suitable sequence
-              for item in (dictionary[chordName])[swap_l]:
-                  improvise_stream.append(item)
-              indx += 1
+       #  create array of all sequence last as current sequence
+       for seqDur in keyDurationsDict[chordName][1:]:
+          if seqDur == keyDurationsDict[chordName][0]:
+             indexesSameDuration.append(idx)
+          idx += 1
 
-          else:
-              # copy the original sequences from musicXML file
-              for item in (dictionary[chordName])[indx]:
-                  improvise_stream.append(item)
-              indx += 1
+       # pick random index of sequence with same duration
+       rand_indx = random.randint(0, len(indexesSameDuration) - 1)
 
-  # Show the improvised music sheet (in musescore3)
-  ###############33 how do we know temp_file_name is the improve file?#############3
-  temp_file_name = 'temp.musicxml'
-  improvise_stream.write('musicxml', temp_file_name)
-  temp_file = open(temp_file_name, 'r')
-  file_content = temp_file.read()
-  updated = file_content.replace('<part-name />','<part-name>p</part-name>')
-  
-  
-  return updated
+       # copy a suitable random seq to output stream
+       for item in (dictionary[chordName])[rand_indx]:
+            improvise_stream.append(item)
 
-#######################################################################################################################
-##################################  Test improvise function  ##########################################################
-#######################################################################################################################
+       # delete original sequence
+       del dictionary[chordName][rand_indx]
+       del keyDurationsDict[chordName][rand_indx]
+
+    # End of the program
+    et = time.time()
+
+    # get the execution time
+    elapsed_time = et - st
+    print('Execution time:', elapsed_time, 'seconds')
+
+    # Show the improvised music sheet (in musescore3)
+    improvise_stream.show()
+
+# Show the improvised music sheet (in musescore3)
+    ################# how do we know temp_file_name is the improve file?##############
+    # temp_file_name = 'temp.musicxml'
+    # improvise_stream.write('musicxml', temp_file_name)
+    # temp_file = open(temp_file_name, 'r')
+    # file_content = temp_file.read()
+    # updated = file_content.replace('<part-name />', '<part-name>p</part-name>')
+    #
+    # return updated, dictionary
 
 if __name__ == '__main__':
-    file_name = 'Another_Hairdo.xml'      # better recieve file's name from the user to prevent error code
-    file = open(file_name, 'r')
-    file_content = file.read()
-    result = improvise(file_name, file_content)
-    print(result)
 
+    # Beginning of the program
+    st = time.time()
+
+    riginal_dict = {}
+    dictForImprovisation = {}  # the big dict compose all
+
+    mydb = mysql.connector.connect(host="localhost", user="root", passwd="danielmysql123benaharondb#&12*-a",database="userdb")
+    db_cursor = mydb.cursor()
+    query1 = 'SELECT id FROM xmltable ORDER BY ID DESC LIMIT 1'
+    db_cursor.execute(query1)
+    last_id = db_cursor.fetchall()[0][0]
+
+    chosen_file_name = 'Anthropology.xml'   # arbitrary
+    #title_music_sheet = chosen_file_name.split(".")[0]
+    chose_file_id = 2
+    #create temp dict of chosen original file
+    query = f'SELECT XML from xmltable WHERE id=2'
+    db_cursor.execute(query)
+    r_xml = db_cursor.fetchall()[0]
+    ifile_content = ""
+    for row in r_xml:
+        ifile_content += "" + str(row)
+    add2Dict(ifile_content, chosen_file_name, chosen_file_name)
+
+    #  run over all files in corpus except chosen one
+    for i in range(1, last_id + 1):
+        if i == chose_file_id:
+            continue
+        query2 = f'SELECT XML from xmltable WHERE id={i}'
+        db_cursor.execute(query2)
+        xml = db_cursor.fetchall()[0]
+        file_content = ""
+        file_name = ""
+        for row in xml:
+            file_name = re.search('<work-title>(.*)</work-title>', row).group(1)
+            file_content += "" + str(row)
+
+        add2Dict(file_content, file_name, chosen_file_name)
+
+        #dictForImprovisation = {**dictForImprovisation, **newDict}   # merge dicts
+
+    improvise(chosen_file_name, ifile_content)
+    #result = improvise(file_name, file_content)
