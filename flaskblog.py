@@ -1,13 +1,15 @@
 import oauth as oauth
 from authlib.integrations.flask_client import OAuth
 
-from extractNotes import improvise
+from extractNotes import improvise, add2dict
 
 from flask import Flask, render_template, url_for, redirect, session, request, flash
 import music21
 from music21 import *
 import os
 import mysql.connector
+import os
+import pickle
 
 # connection to DB
 mydb = mysql.connector.connect(
@@ -30,6 +32,8 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_mysqldb import MySQL
 from flask_sqlalchemy import SQLAlchemy      # transfer data is in SQL into python objects
 from datetime import datetime
+
+dictionary = {}
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'  # arbitrary value
@@ -237,6 +241,20 @@ def uploadPost():
     speed = int(request.form.get('speed'))
     print(speed)
     content = file.stream.read().decode('utf-8')
+    
+    # check if the file is already exists in db
+    EXIST_QUERY = f'SHOW COLUMNS FROM userdb.xmltable2 LIKE \'%{file.filename}%\''
+    
+    # if if is a new file
+    if db_cursor.execute(EXIST_QUERY) is not None:
+        INSERT_QUERY = f"INSERT INTO XMLTable (XML, name) VALUES (%s, %s)"
+        values = (content, file.filename)
+        db_cursor.execute(INSERT_QUERY,values)
+        mydb.commit()
+        
+        # if it is a new file data to dict
+        add2dict(file.filename,dictionary,content)
+    
     INSERT_QUERY = f"INSERT INTO XMLTable2 (XML, name) VALUES (%s, %s)"
     values = (content, file.filename)
     db_cursor.execute(INSERT_QUERY,values)
