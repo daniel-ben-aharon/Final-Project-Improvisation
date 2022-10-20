@@ -21,17 +21,6 @@ mydb = mysql.connector.connect(
 db_cursor = mydb.cursor(buffered=True)
 
 charlie_parker_scores = ["Another_Hairdo.xml","Anthropology.xml","An_Oscar_For_Treadwell.xml","Au_Private_1.xml","Au_Private_2.xml","Back_Home_Blues.xml","Barbados.xml","Billies's_Bounce.xml","Bird_Gets_The_Worm.xml","Bloomdido.xml","Blues_For_Alice.xml","Blue_Bird.xml","Buzzy.xml","Card_Board.xml","Celerity.xml","Chasing_The_Bird.xml","Cheryl.xml","Chi_Chi.xml","Confirmation.xml","Cosmic_Rays.xml","Dewey_Square.xml","Diverse.xml","Donna_Lee.xml","KC_Blues.xml","Kim_1.xml","Kim_2.xml","Ko_Ko.xml","Laird_Baird.xml","Marmaduke.xml","Mohawk_1.xml","Mohawk_2.xml","Moose_The_Mooche.xml","My_Little_Suede_Shoes.xml","Now's_The_Time_1.xml","Now's_The_Time_2.xml","Ornithology.xml","Passport.xml","Perhaps.xml","Red_Cross.xml","Relaxing_With_Lee.xml","Scrapple_From_The_Apple.xml","Segment.xml","Shawnuff.xml","Si_Si.xml","Steeplechase.xml","The_Bird.xml","Thriving_From_A_Riff.xml","Visa.xml","Warming_Up_A_Riff.xml","Yardbird_Suite.xml"]
-###   To run FLASK
-###   in windows OS:
-###   1. set the variable environment of FLASK_APP
-###      in this case write in terminal pycharm the following: set FLASK_APP=flaskblog.py
-###   2. Run the application using the following command in terminal:  flask run
-###   3. To run in 'Debug mode' write terminal python the following command:  set  FLASK_DEBUG = 1
-
-###   in Mac:
-###   1. set the variable environment of FLASK_APP
-###      in this case write in terminal pycharm the following: export FLASK_APP=flaskblog.py
-###   2. Run the application using the following command in terminal:  flask run
 
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
@@ -39,7 +28,7 @@ from wtforms import StringField, PasswordField, SelectField, BooleanField
 from wtforms.validators import InputRequired, Email, Length
 
 from flask_mysqldb import MySQL
-from flask_sqlalchemy import SQLAlchemy        # transfer data is in SQL into python objects
+from flask_sqlalchemy import SQLAlchemy      # transfer data is in SQL into python objects
 from datetime import datetime
 
 app = Flask(__name__)
@@ -49,7 +38,7 @@ app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'  # arbitrary value
 
 Bootstrap(app)
 
-class LoginForm(FlaskForm):            # inherit from FlaskForm
+class LoginForm(FlaskForm):            
     username = StringField('username', validators=[InputRequired(),Length(min=3,max=15)])
     password = PasswordField('password', validators=[InputRequired(), Length(min=8,max=80)])
     remember = BooleanField('remember me')
@@ -166,7 +155,7 @@ def loginWithGoogle():
 def login():
     form = LoginForm()
 
-    if form.validate_on_submit():    #  check to works if form is submitted
+    if form.validate_on_submit():    
         query = 'SELECT * FROM users WHERE name="'+form.username.data + '"'
         print(query)
         db_cursor.execute(query)
@@ -315,4 +304,15 @@ def get_xmls():
 
 
 if __name__ == '__main__':
+    # Specify path
+    # path = '/usr/local/bin/'  # for linux
+    path = 'dictcache'
+    # Check whether the specified path exists or not
+    isExist = os.path.exists(path)
+
+    if isExist:
+        # load dictionary from file
+        with open('dictcache', 'rb') as f:
+            dictionary = pickle.load(f)
+            
     app.run(debug=True)
