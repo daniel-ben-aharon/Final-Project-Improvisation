@@ -54,7 +54,6 @@ class LoginForm(FlaskForm):            # inherit from FlaskForm
     password = PasswordField('password', validators=[InputRequired(), Length(min=8,max=80)])
     remember = BooleanField('remember me')
 
-
 class RegisterForm(FlaskForm):
      email = StringField('email',validators=[InputRequired(),Email(message='Invalid email'),Length(max=50)])
      username = StringField('username',validators=[InputRequired(),Length(min=3,max=15)])
@@ -66,7 +65,6 @@ class ChosenXmlForm(FlaskForm):
      speed = StringField('speed',validators=[InputRequired()])
     
    
-
 # configure to mysql database
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////users.db' # users is name of our DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:123@localhost/userdb' # userdb is name of our DB
@@ -98,7 +96,6 @@ with app.app_context():
     db.session.commit()
 
 # oauth config
-# https://www.youtube.com/watch?v=BfYsdNaHrps&ab_channel=Vuka
 oauth = OAuth(app)
 google = oauth.register(
     name='google',  # client_id=os.getenv("GOOGLE_CLIENT_ID"),
@@ -153,22 +150,8 @@ def home():
         db.session.add(upload)
         db.session.commit()
         return render_template('home.html',data = charlie_parker_scores)
-
-        # userDetails = request.form
-        # name = userDetails['name']
-        # email = userDetails['email']
-        # password = userDetails['password']
-        # date = datetime.now()
-        # id = 0
-        # cur = db.connection.cursor()
-        # cur.execute("INSERT INTO users(username,email,password,create_time,id) VALUES(%s, %s, %s, %s, %d)",(name, email,password,date, id))
-        # db.connection.commit()
-        # cur.close()
-        # return 'success'
-
     return render_template('home.html',data = charlie_parker_scores)
-    # n = music21.note.Note("G5")
-    # return "<p>" + n.name + "</p>"
+
 
 
 # Route for handling the login page with google account
@@ -205,6 +188,7 @@ def login():
 def signinGet():
    form = RegisterForm()
 
+
    print('signin get')
    
    return render_template('signin.html',form=form)
@@ -227,7 +211,7 @@ def signinPost():
             print(query)
             user = db_cursor.execute(query)
             mydb.commit()
-
+        
         name = form.username.data
         email = form.email.data
 
@@ -242,7 +226,7 @@ def signinPost():
         return render_template("profile.html", name=name, email=email,xmls=xmls)
     return render_template('signin.html',form=form)
 
-@app.route("/profile", methods=['GET'])        # register
+@app.route("/profile", methods=['GET'])        
 def profile():
     query = 'SELECT * from xmltable2'
     db_cursor.execute(query)
@@ -323,7 +307,6 @@ def about():
     return render_template('about.html', title='About')
 
 
-
 def get_xmls():
     query = 'SELECT * from xmltable2'
     db_cursor.execute(query)
@@ -333,12 +316,3 @@ def get_xmls():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-#  To create a DB:
-#  https://www.youtube.com/watch?v=hQl2wyJvK5k&ab_channel=Codemy.com
-#  1.  Create Model  (Class)
-#  2.  Add command that add data to DB
-#  3.  Add command of commit:             db.session.commit()
-#  4.  From terminal write the following commands:
-#     (i)  from flaskblog.py import db
-#     (ii) db.create_all()
