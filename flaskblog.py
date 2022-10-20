@@ -87,11 +87,6 @@ class Users(db.Model):
     password = db.Column(db.String(80), nullable=False)
     date_added = db.Column(db.DateTime, default=datetime.utcnow ,nullable=False, unique=True)
 
-    #Create a function to return a string when we add something
-    def __repr__(self):
-        return '<Name %r' % self.id
-
-
 class Upload(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(50))
