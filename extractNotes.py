@@ -86,8 +86,9 @@ def improvise(file_name,dictionary,file_content='', speed=150):
     improvise_stream.append(tempo.MetronomeMark(number=speed))
 
     # update title name
+    original_title = file_name.split(".")[0]
     improvise_stream.insert(0, metadata.Metadata())
-    improvise_stream.metadata.title = 'Improvised - ' + file_name
+    improvise_stream.metadata.title = 'Improvised - ' + original_title
 
     improvise_stream.insert(0, metadata.Metadata())
     improvise_stream.metadata.composer = " "  # we should change it to modulary
