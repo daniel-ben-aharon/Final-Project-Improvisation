@@ -92,6 +92,11 @@ class Upload(db.Model):
     filename = db.Column(db.String(50))
     data = db.Column(db.LargeBinary)    # BLOB = Binary Large Object : use LargeBinary to store arbitrary binary data-type in DB
 
+# create the db tables automatically when the application rises
+with app.app_context():
+    db.create_all()
+    db.session.commit()
+
 # oauth config
 # https://www.youtube.com/watch?v=BfYsdNaHrps&ab_channel=Vuka
 oauth = OAuth(app)
