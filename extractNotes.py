@@ -26,8 +26,6 @@ def add2Dict(dictionary, file_content):
         seq = []
         j = 0
         if isinstance(item, chord.Chord):
-            chordOrder.append(item)
-
             figure = item.figure
             notes = myScore.recurse().notesAndRests[inx + 1:]
             while j < len(notes):
@@ -42,8 +40,6 @@ def add2Dict(dictionary, file_content):
             else:
                 dictionary[figure] = [seq]
 
-
-
 # The function return chordOrder of a given musicXML file
 def getChordOrder(xmlfileContent):
     chordOrder = []
@@ -55,22 +51,16 @@ def getChordOrder(xmlfileContent):
             chordOrder.append(item)
     return chordOrder
 
-
-# The function implement the improvisation algorithm
-def improvise(file_name,dictionary,file_content='', speed=150):
-
-    # Beginning of the program
-    st = time.time()
-
-    chordOrder = getChordOrder(file_content)
-    # Calculate each seq duration in dict values
-    durationDict = {}
+# function get dict of xmlfile where (key, value) = (Chord, seq)
+# and return dict of duration where (key, value) = (Chord, list(seq_duration) )
+def createDurationDict(mydict):
     keyDurationsDict = {}
+
     # for each key
-    for k in list(dictionary.keys()):
+    for k in mydict.keys():
         chordDuration = []
         # for each sequence
-        for seq in dictionary[k]:
+        for seq in mydict[k]:
             # calculate duration of each sequence
             seqDuration = 0
             for item in seq:
@@ -78,10 +68,26 @@ def improvise(file_name,dictionary,file_content='', speed=150):
 
             chordDuration.append(seqDuration)
 
-        # create list of list duration of each sequence in each key
-        keyDurationsDict[k] = chordDuration
+        # create list of duration of each sequence in each key
+        if chordDuration is not None:
+             keyDurationsDict[k] = chordDuration
 
-    #print(f"keyDurationsDict: {keyDurationsDict}")
+    return keyDurationsDict
+
+# The function implement the improvisation algorithm
+def improvise(file_name,dictionary,file_content='', speed=150):
+
+    # # Beginning of the program
+    st = time.time()
+    temp_dict = dictionary        # use a copy of big dictionary
+
+    file_to_improvised_dict = {}
+    add2Dict(file_to_improvised_dict, file_content)  # create dictionary of file to improvise on
+
+    # Calculate each seq duration in original dictionary values and chosen file
+    chosenFileDurationDict = createDurationDict(file_to_improvised_dict)
+    oldDurationDict =  createDurationDict(temp_dict)
+
     improvise_stream = stream.Stream()
     improvise_stream.append(tempo.MetronomeMark(number=speed))
 
@@ -95,55 +101,56 @@ def improvise(file_name,dictionary,file_content='', speed=150):
 
     # configure.run()  ## To use show() method - run this function once, choose No options and then put it on comment in next time
 
-    # chosen_chord = list(dictionary.keys())[chosen_chord_Indx]
+    chordOrder = getChordOrder(file_content)       # get chordOrder of file to improvise on
 
     # run over all chord of the original musicXML file by order
-    currentChordIndx = 0
-    idx = 1
-    #print(f"dictionary: {dictionary}")
-    # loop over all chords in chosen file by order
-    # for c in chordOrder:
-
     for c in chordOrder:
+       # temp variables
+       idx = 0
+       indexesSameDuration = []      # list of all indexes in big dict with same duration as current seq
+       currentSeqsDurationList = []
 
-       indexesSameDuration = []
-       currentSeqDurationList = []
        # add Chord sign to the improvised music sheet
        improvise_stream.append(c)
 
        # gets Chord short name: 'F7', 'B-' etc.
        chordName = c.figure
 
+       currentSeqsDurationList = chosenFileDurationDict[chordName]
+       currentSeqDuration = currentSeqsDurationList[0]
 
-       currentSeqDurationList = keyDurationsDict[chordName]
-
-       #  create array of all sequence last as current sequence
-    # if len(keyDurationsDict[chordName]) == 1:
-    #     rand_indx = 0
-
-    # else:
-       for seqDur in keyDurationsDict[chordName][1:]:
-           if seqDur == keyDurationsDict[chordName][0]:
+       for seqDur in oldDurationDict[chordName]:
+           if seqDur == currentSeqDuration:
                indexesSameDuration.append(idx)
            idx += 1
 
-       # pick random index of sequence with same duration
-       rand_indx = random.randint(0, len(indexesSameDuration) - 1)
+       #pick random index of sequence with same duration
+       if len(indexesSameDuration) > 1:
+            rand_indx = indexesSameDuration[random.randint(0, len(indexesSameDuration) - 1)]
+
+       else:
+           # chose the same sequence as original file
+           rand_indx = 0
 
        # copy a suitable random seq to output stream
-       for item in (dictionary[chordName])[rand_indx]:
+       for item in (temp_dict[chordName])[rand_indx]:
            improvise_stream.append(item)
 
        # delete original sequence
-       del dictionary[chordName][rand_indx]
-       del keyDurationsDict[chordName][rand_indx]
+       del chosenFileDurationDict[chordName][0]
+       del file_to_improvised_dict[chordName][0]
 
+       # delete seq from copy dict
+       del temp_dict[chordName][rand_indx]
+       del oldDurationDict[chordName][rand_indx]
+
+       loopnum += 1
     # End of the program
     et = time.time()
 
     # get the execution time
     elapsed_time = et - st
-    print('Execution time:', elapsed_time / 60, 'minutes')
+    print('Execution time:', elapsed_time, 'seconds')
 
     # Show the improvised music sheet (in musescore3)
     improvise_stream.show()
@@ -156,4 +163,4 @@ def improvise(file_name,dictionary,file_content='', speed=150):
     file_content = temp_file.read()
     updated = file_content.replace('<part-name />', '<part-name>p</part-name>')
 
-    return updated, dictionary
+    return updated
