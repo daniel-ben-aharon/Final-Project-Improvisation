@@ -49,7 +49,7 @@ def getChordOrder(xmlfileContent):
     chordOrder = []
     myScore = converter.parse(xmlfileContent)
 
-    for inx in range(len(myScore.recurse().notes)):
+    for inx in range(len(myScore.recurse().notesAndRests)):
         item = myScore.recurse().notesAndRests[inx]
         if isinstance(item, chord.Chord):
             chordOrder.append(item)
