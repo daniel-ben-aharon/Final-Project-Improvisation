@@ -327,5 +327,8 @@ if __name__ == '__main__':
         # load dictionary from file
         with open('dictcache', 'rb') as f:
             dictionary = pickle.load(f)
-            
+            # prevent using the file again
+            # f.close()
+            # os.remove('dictcache')
+
     app.run(debug=True)
