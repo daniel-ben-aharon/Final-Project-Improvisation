@@ -216,7 +216,7 @@ def signinPost():
 
 @app.route("/profile", methods=['GET'])        
 def profile():
-    query = 'SELECT * from xmltable2'
+    query = 'SELECT * from xmltable'
     db_cursor.execute(query)
     xmls = db_cursor.fetchall()
     for xml in xmls:
@@ -238,7 +238,7 @@ def uploadPost():
     content = file.stream.read().decode('utf-8')
     
     # check if the file is already exists in db
-    EXIST_QUERY = f'SHOW COLUMNS FROM userdb.xmltable2 LIKE \'%{file.filename}%\''
+    EXIST_QUERY = f'SHOW COLUMNS FROM userdb.xmltable LIKE \'%{file.filename}%\''
     
     # if it is a new file
     if db_cursor.execute(EXIST_QUERY) is None:
@@ -250,7 +250,7 @@ def uploadPost():
         # if it is a new file data to dict
         addToDict(dictionary,content)
     
-    INSERT_QUERY = f"INSERT INTO XMLTable2 (XML, name) VALUES (%s, %s)"
+    INSERT_QUERY = f"INSERT INTO XMLTable (XML, name) VALUES (%s, %s)"
     values = (content, file.filename)
     db_cursor.execute(INSERT_QUERY,values)
     mydb.commit()
@@ -277,7 +277,7 @@ def chosenXml():
     xml_filename=form.xml_filename.data
     speed = int(form.speed.data)
     print(speed)
-    query = f'SELECT * from xmltable2 WHERE name="{xml_filename}"'
+    query = f'SELECT * from xmltable WHERE name="{xml_filename}"'
     db_cursor.execute(query)
     xml = db_cursor.fetchall()[0]
    
@@ -310,7 +310,7 @@ def about():
 
 
 def get_xmls():
-    query = 'SELECT * from xmltable2'
+    query = 'SELECT * from xmltable'
     db_cursor.execute(query)
     xmls = db_cursor.fetchall()
     return xmls
