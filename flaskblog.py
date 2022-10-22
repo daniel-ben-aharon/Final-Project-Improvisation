@@ -32,8 +32,6 @@ from flask_mysqldb import MySQL
 from flask_sqlalchemy import SQLAlchemy      # transfer data is in SQL into python objects
 from datetime import datetime
 
-dictionary = {}
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'  # arbitrary value
 
