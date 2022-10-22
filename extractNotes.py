@@ -6,7 +6,7 @@ import xml.etree.ElementTree as et
 import time    # for extimate runtime of the algorithm
 
 # Each time we add a musicXML file we add its data to our dictionary
-def add2Dict(dictionary, file_content):
+def addToDict(dictionary, file_content):
     """Gets musicXML file name and create a dictionary from it
        here the key is the Chord and the value is sequence of notes play while chord plays
 
@@ -82,7 +82,7 @@ def improvise(file_name,dictionary,file_content='', speed=150):
     temp_dict = dictionary        # use a copy of big dictionary
 
     file_to_improvised_dict = {}
-    add2Dict(file_to_improvised_dict, file_content)  # create dictionary of file to improvise on
+    addToDict(file_to_improvised_dict, file_content)  # create dictionary of file to improvise on
 
     # Calculate each seq duration in original dictionary values and chosen file
     chosenFileDurationDict = createDurationDict(file_to_improvised_dict)
@@ -144,7 +144,6 @@ def improvise(file_name,dictionary,file_content='', speed=150):
        del temp_dict[chordName][rand_indx]
        del oldDurationDict[chordName][rand_indx]
 
-       loopnum += 1
     # End of the program
     et = time.time()
 
