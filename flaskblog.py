@@ -3,7 +3,7 @@ from authlib.integrations.flask_client import OAuth
 
 from extractNotes import improvise, addToDict
 
-from flask import Flask, render_template, url_for, redirect, session, request, flash
+from flask import Flask, render_template, url_for, redirect, session, request
 import music21
 from music21 import *
 import os
@@ -30,7 +30,6 @@ from wtforms.validators import InputRequired, Email, Length
 
 from flask_mysqldb import MySQL
 from flask_sqlalchemy import SQLAlchemy      # transfer data is in SQL into python objects
-from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'  # arbitrary value
@@ -73,7 +72,6 @@ class Users(db.Model):
     name = db.Column(db.String(15), nullable=False)
     email = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(80), nullable=False)
-    date_added = db.Column(db.DateTime, default=datetime.utcnow ,nullable=False, unique=True)
 
 class Upload(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -189,7 +187,8 @@ def signinPost():
     form = RegisterForm()
     name = None
     print('signin post')
-    if form and form.validate_on_submit():
+    if form and form.vali
+    _on_submit():
         print(form.email.data)
         query = 'SELECT * FROM users WHERE email="'+form.email.data + '"'
         print(query)
@@ -209,7 +208,6 @@ def signinPost():
         form.username.data = ''
         form.password.data = ''
         form.email.data = ''
-        flash("User Added Successfully!")
 
         xmls = get_xmls()
 
