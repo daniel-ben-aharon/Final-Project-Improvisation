@@ -1,7 +1,7 @@
 import oauth as oauth
 from authlib.integrations.flask_client import OAuth
 
-from extractNotes import improvise, addTodict
+from extractNotes import improvise, addToDict
 
 from flask import Flask, render_template, url_for, redirect, session, request, flash
 import music21
@@ -252,7 +252,7 @@ def uploadPost():
         mydb.commit()
         
         # if it is a new file data to dict
-        addTodict(file.filename,dictionary,content)
+        addToDict(file.filename,dictionary,content)
     
     INSERT_QUERY = f"INSERT INTO XMLTable2 (XML, name) VALUES (%s, %s)"
     values = (content, file.filename)
