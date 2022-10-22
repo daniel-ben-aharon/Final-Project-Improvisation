@@ -1,14 +1,13 @@
 import oauth as oauth
 from authlib.integrations.flask_client import OAuth
 
-from extractNotes import improvise, add2dict
+from extractNotes import improvise, addTodict
 
 from flask import Flask, render_template, url_for, redirect, session, request, flash
 import music21
 from music21 import *
 import os
 import mysql.connector
-import os
 import pickle
 
 # connection to DB
@@ -245,7 +244,7 @@ def uploadPost():
     # check if the file is already exists in db
     EXIST_QUERY = f'SHOW COLUMNS FROM userdb.xmltable2 LIKE \'%{file.filename}%\''
     
-    # if if is a new file
+    # if it is a new file
     if db_cursor.execute(EXIST_QUERY) is not None:
         INSERT_QUERY = f"INSERT INTO XMLTable (XML, name) VALUES (%s, %s)"
         values = (content, file.filename)
@@ -253,7 +252,7 @@ def uploadPost():
         mydb.commit()
         
         # if it is a new file data to dict
-        add2dict(file.filename,dictionary,content)
+        addTodict(file.filename,dictionary,content)
     
     INSERT_QUERY = f"INSERT INTO XMLTable2 (XML, name) VALUES (%s, %s)"
     values = (content, file.filename)
