@@ -3,13 +3,13 @@ import os
 # connection to DB
 
 def createDB():
-    firstdb = mysql.connector.connect(host="localhost",user="root", passwd="danielmysql123benaharondb#&12*-a")
+    firstdb = mysql.connector.connect(host="localhost",user="root", passwd="123")  # passwd="danielmysql123benaharondb#&12*-a"
     my_cursor = firstdb.cursor()
     my_cursor.execute("CREATE DATABASE userdb")
 
 
 def createTables():
-    mydb = mysql.connector.connect(host="localhost",user="root",passwd="danielmysql123benaharondb#&12*-a",database="userdb")
+    mydb = mysql.connector.connect(host="localhost",user="root",passwd="123",database="userdb")   # passwd="danielmysql123benaharondb#&12*-a"
 
     CREATE_TABLE1 = '''CREATE TABLE `userdb`.`improvs` (
     `id` INT NOT NULL AUTO_INCREMENT,
