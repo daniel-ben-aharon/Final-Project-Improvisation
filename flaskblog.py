@@ -245,14 +245,14 @@ def uploadPost():
     EXIST_QUERY = f'SHOW COLUMNS FROM userdb.xmltable2 LIKE \'%{file.filename}%\''
     
     # if it is a new file
-    if db_cursor.execute(EXIST_QUERY) is not None:
+    if db_cursor.execute(EXIST_QUERY) is None:
         INSERT_QUERY = f"INSERT INTO XMLTable (XML, name) VALUES (%s, %s)"
         values = (content, file.filename)
         db_cursor.execute(INSERT_QUERY,values)
         mydb.commit()
         
         # if it is a new file data to dict
-        addToDict(file.filename,dictionary,content)
+        addToDict(dictionary,content)
     
     INSERT_QUERY = f"INSERT INTO XMLTable2 (XML, name) VALUES (%s, %s)"
     values = (content, file.filename)
