@@ -283,7 +283,7 @@ def chosenXml():
    
     
     original_music_xml = xml[2]
-    improv = improvise(xml_filename, original_music_xml, speed)
+    improv = improvise(xml_filename,dictionary, original_music_xml, speed)
     INSERT_QUERY = f"INSERT INTO improvs (XML, name) VALUES (%s, %s)"
     improv_values = (improv, xml_filename)
     db_cursor.execute(INSERT_QUERY,improv_values)
