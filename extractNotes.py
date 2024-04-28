@@ -1,9 +1,7 @@
-import re                 # for regular expressions
-import mysql.connector
 from music21 import *
 import random
-import xml.etree.ElementTree as et
-import time    # for extimate runtime of the algorithm
+import time    # for estimate runtime of the algorithm
+
 
 # Each time we add a musicXML file we add its data to our dictionary
 def addToDict(dictionary, file_content):
@@ -18,7 +16,6 @@ def addToDict(dictionary, file_content):
     file_content:  str
          File content
     """
-
     myScore = converter.parse(file_content)
 
     for inx in range(len(myScore.recurse().notesAndRests)):
@@ -74,10 +71,11 @@ def createDurationDict(mydict):
 
     return keyDurationsDict
 
-# The function implement the improvisation algorithm
-def improvise(file_name,dictionary,file_content='', speed=150):
 
-    # # Beginning of the program
+# The function implement the improvisation algorithm
+def improvise(file_name, dictionary, file_content='', speed=150):
+
+    # Beginning of the program
     st = time.time()
     temp_dict = dictionary        # use a copy of big dictionary
 
@@ -86,7 +84,7 @@ def improvise(file_name,dictionary,file_content='', speed=150):
 
     # Calculate each seq duration in original dictionary values and chosen file
     chosenFileDurationDict = createDurationDict(file_to_improvised_dict)
-    oldDurationDict =  createDurationDict(temp_dict)
+    oldDurationDict = createDurationDict(temp_dict)
 
     improvise_stream = stream.Stream()
     improvise_stream.append(tempo.MetronomeMark(number=speed))
@@ -100,7 +98,6 @@ def improvise(file_name,dictionary,file_content='', speed=150):
     improvise_stream.metadata.composer = " "  # we should change it to modulary
 
     # configure.run()  ## To use show() method - run this function once, choose No options and then put it on comment in next time
-
     chordOrder = getChordOrder(file_content)       # get chordOrder of file to improvise on
 
     # run over all chord of the original musicXML file by order
